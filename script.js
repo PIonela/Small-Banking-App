@@ -159,8 +159,10 @@ const totalDepositsUSD = movements
   // .map(mov => mov * eurToUsd)
   .reduce((acc, mov) => acc + mov, 0);
 // console.log(totalDepositsUSD);
+
 let currentAccount;
-// Event handler
+
+// Event handlers
 btnLogin.addEventListener("click", function (e) {
   e.preventDefault();
   currentAccount = accounts.find(
@@ -199,4 +201,20 @@ btnTransfer.addEventListener("click", function (e) {
 
     updateUI(currentAccount);
   }
+});
+
+btnClose.addEventListener("click", function (e) {
+  e.preventDefault();
+  if (
+    currentAccount.username === inputCloseUsername.value &&
+    currentAccount.pin === Number(inputClosePin.value)
+  ) {
+    const index = accounts.findIndex(
+      (acc) => acc.username === currentAccount.username
+    );
+    accounts.splice(index, 1);
+    containerApp.style.opacity = 0;
+    console.log(accounts);
+  }
+  inputCloseUsername.value = inputClosePin.value = "";
 });
