@@ -78,7 +78,45 @@ const displayMovements = function (movements) {
   });
 };
 
-displayMovements(account1.movements);
+const calcDisplaySummary = function (account) {
+  const incomes = account.movements
+    .filter((movements) => movements > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${incomes} EUR`;
+  const outcomes = account.movements
+    .filter((movements) => movements < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(outcomes)} EUR`;
+
+  const interest = movements
+    .filter((mov) => mov > 0)
+    .map((deposit) => (deposit * account.interest) / 100)
+    .filter((int, i, arr) => {
+      // console.log(arr);
+      return int >= 1;
+    })
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+// const user = "Steven Thomas Williams"; //=> stw
+const createUsername = function (accs) {
+  accs.forEach((acc) => {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word[0])
+      .join("");
+  });
+};
+createUsername(accounts);
+console.log(accounts);
+
+const calcAndPrintBalance = function (account) {
+  let balance = account.movements.reduce((acc, curr) => acc + curr, 0);
+  labelBalance.innerHTML = balance + "€";
+};
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -92,3 +130,47 @@ const currencies = new Map([
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
+
+const deposits = movements.filter(function (mov) {
+  return mov > 0;
+});
+// console.log(deposits);
+const withdrawals = movements.filter((mov) => mov < 0);
+// console.log(withdrawals);
+
+//////////////////////////////////////
+// The Magic of Chaining Methods
+const eurToUsd = 1.1;
+// console.log(movements);
+
+// PIPELINE
+const totalDepositsUSD = movements
+  .filter((mov) => mov > 0)
+  .map((mov, i, arr) => {
+    // console.log(arr);
+    return mov * eurToUsd;
+  })
+  // .map(mov => mov * eurToUsd)
+  .reduce((acc, mov) => acc + mov, 0);
+// console.log(totalDepositsUSD);
+let currentAccount;
+// Event handler
+btnLogin.addEventListener("click", function (e) {
+  e.preventDefault();
+  currentAccount = accounts.find(
+    (acc) => acc.username === inputLoginUsername.value
+  );
+  console.log(currentAccount);
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    console.log("log in");
+    labelWelcome.textContent = `Welcome, ${currentAccount.owner.split(" ")[0]}`;
+    containerApp.style.opacity = 1;
+
+    inputLoginUsername.value = inputLoginPin.value = "";
+
+    displayMovements(currentAccount.movements);
+    calcDisplaySummary(currentAccount);
+    calcAndPrintBalance(currentAccount);
+  }
+});
