@@ -113,8 +113,14 @@ createUsername(accounts);
 console.log(accounts);
 
 const calcAndPrintBalance = function (account) {
-  let balance = account.movements.reduce((acc, curr) => acc + curr, 0);
-  labelBalance.innerHTML = balance + "€";
+  account.balance = account.movements.reduce((acc, curr) => acc + curr, 0);
+  labelBalance.innerHTML = account.balance + "€";
+};
+
+const updateUI = function (acc) {
+  displayMovements(acc.movements);
+  calcDisplaySummary(acc);
+  calcAndPrintBalance(acc);
 };
 
 /////////////////////////////////////////////////
@@ -169,8 +175,28 @@ btnLogin.addEventListener("click", function (e) {
 
     inputLoginUsername.value = inputLoginPin.value = "";
 
-    displayMovements(currentAccount.movements);
-    calcDisplaySummary(currentAccount);
-    calcAndPrintBalance(currentAccount);
+    updateUI(currentAccount);
+  }
+});
+
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+  const amount = inputTransferAmount.value;
+  const sendToAcc = accounts.find(
+    (acc) => acc.username === inputTransferTo.value
+  );
+  inputTransferTo.value = inputTransferAmount.value = "";
+  if (
+    amount > 0 &&
+    sendToAcc &&
+    currentAccount.balance >= amount &&
+    sendToAcc?.username !== currentAccount.username
+  ) {
+    currentAccount.movements.push(-Number(amount));
+
+    sendToAcc.movements.push(Number(amount));
+    console.log(currentAccount.movements);
+
+    updateUI(currentAccount);
   }
 });
